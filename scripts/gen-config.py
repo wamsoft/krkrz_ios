@@ -249,7 +249,7 @@ def main():
             raise SystemExit(f"unknown orientation '{o}' (must be one of {list(ORIENTATIONS)})")
     orient_plist = "".join(f"\t\t<string>{ORIENTATIONS[o]}</string>\n" for o in orient)
     devices = cfg.get("devices") or ["iphone", "ipad"]
-    graphics = cfg.get("graphics", "metal")
+    graphics = cfg.get("graphics", "gles")
     if graphics not in ("metal", "gles"):
         raise SystemExit(f"unknown graphics '{graphics}' (must be 'metal' or 'gles')")
 

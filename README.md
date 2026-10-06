@@ -80,7 +80,8 @@ ${PROJECT_DIR}/build/ios/
   "deploymentTarget": "16.0",
   "devices": ["iphone", "ipad"],
   "orientations": ["landscapeLeft", "landscapeRight"],  // portrait / portraitUpsideDown も可
-  "graphics": "metal",            // "metal" (SDL_Renderer) | "gles" (OpenGL ES, ogl/sdlogl DrawDevice)
+  "graphics": "gles",             // "gles" (既定。OpenGL ES, ogl/sdlogl DrawDevice、Canvas / Shader 等の GL 機能が使える)
+                                  // | "metal" (SDL_Renderer のみ。GL 機能は使えない)
   "repl": true,                   // ブラウザ REPL (-replweb) を組み込むか。配布ビルドは false
   "icon": "icon/AppIcon-1024.png",// 1024x1024 PNG 1 枚 (任意)
   "infoPlist": { },               // Info.plist への追加キー
@@ -135,3 +136,16 @@ REPL の使い方はエンジン側 `doc/REPL.md` と skill `krkrz-repl` を参�
 
 初回はローカルネットワーク利用の許可ダイアログが出ることがある (`NSLocalNetworkUsageDescription`
 は repl 有効時に自動で Info.plist に入る)。配布ビルドでは `"repl": false` にすること。
+
+## タッチ操作
+
+iOS ではタッチ→マウス変換をエンジン側で行う (SDL 標準の変換は無効)。
+
+| 操作 | 送られるもの |
+|---|---|
+| 1 本指タップ / ドラッグ | 左ボタンの押下・移動・解放 (押下は 100ms 保留して 2 本指と区別) |
+| 2 本指タップ (動かさずに離す) | ESC キー (戻る) |
+| 2 本指で上下スワイプ | マウスホイール (指を上へ = 下へスクロール) |
+
+`Window.enableTouch = true` にすると `onTouch*` イベントも届く。
+`Window.enableTouchMouse = false` でマウスへの変換を止められる。

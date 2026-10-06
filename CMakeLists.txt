@@ -121,9 +121,9 @@ option(KRKRZ_BUILD_TESTS "" OFF)
 option(KRKRZ_USE_ELEMENTS "" ON)
 option(KRKRZ_USE_A11Y "" OFF)
 
-# グラフィックス方式 (ios-config.json の graphics)
-#   metal : SDL_Renderer (Metal) の sdl DrawDevice のみ (macOS 版と同じ)
-#   gles  : OpenGL ES (EAGL) を有効化し ogl / sdlogl DrawDevice を使う
+# グラフィックス方式 (ios-config.json の graphics、 既定 gles)
+#   gles  : OpenGL ES (EAGL) を有効化し ogl / sdlogl DrawDevice を使う (Android / macOS と同じ)
+#   metal : SDL_Renderer (Metal) の sdl DrawDevice のみ (GL 系機能は使えない)
 if(APP_GRAPHICS STREQUAL "gles")
     set(KRKRZ_USE_OPENGL ON CACHE BOOL "" FORCE)
     list(APPEND KRKRZ_DEFINES_PLATFORM GLES_SILENCE_DEPRECATION)

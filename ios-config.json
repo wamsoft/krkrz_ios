@@ -6,7 +6,7 @@
   "deploymentTarget": "16.0",
   "devices": ["iphone", "ipad"],
   "orientations": ["landscapeLeft", "landscapeRight"],
-  "graphics": "metal",
+  "graphics": "gles",
   "repl": true,
   "cmake": {
     "pluginFolders": [
