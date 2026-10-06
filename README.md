@@ -5,7 +5,13 @@
 案件 (ios-config.json + 資材) は別フォルダに置いてビルドできる。
 
 エンジン本体・プラグインは `${KRKRZ_BASE}/krkrz_dev` を参照する
-(このリポジトリには含まれない)。設計の詳細は [docs/ios-design.md](docs/ios-design.md)。
+(このリポジトリには含まれない)。
+
+| ドキュメント | 内容 |
+|---|---|
+| [docs/release.md](docs/release.md) | 配布ビルド (Archive / ipa)、App Store Connect 提出、提出前チェックリスト |
+| [docs/icon.md](docs/icon.md) | アプリアイコンの置き場所・設定・画像要件 |
+| [docs/ios-design.md](docs/ios-design.md) | 設計検討と実装経緯 |
 
 ## 必要なもの
 
@@ -44,6 +50,8 @@ make run SIM_DEVICE=<UDID> # Simulator を指定 (未起動なら boot)。一覧
 make build SDK=device DEVICE=<UDID>   # 実機用 (UDID は xcrun xctrace list devices)
 make run SDK=device DEVICE=<UDID>     # 実機にインストールして起動
 make xcode                 # 生成された Xcode プロジェクトを開く (デバッガ用)
+make ipa                   # 配布用 Release ビルド (REPL なし) → build/ios/ipa/*.ipa  → docs/release.md
+make ipa EXPORT_METHOD=app-store-connect   # App Store Connect / TestFlight 提出用
 make distclean             # build/ios を削除
 
 # 案件ビルド
@@ -83,7 +91,8 @@ ${PROJECT_DIR}/build/ios/
   "graphics": "gles",             // "gles" (既定。OpenGL ES, ogl/sdlogl DrawDevice、Canvas / Shader 等の GL 機能が使える)
                                   // | "metal" (SDL_Renderer のみ。GL 機能は使えない)
   "repl": true,                   // ブラウザ REPL (-replweb) を組み込むか。配布ビルドは false
-  "icon": "icon/AppIcon-1024.png",// 1024x1024 PNG 1 枚 (任意)
+  "icon": "icon/AppIcon-1024.png",// 1024x1024 PNG (アルファ無し)。ダーク / ティントも可 → docs/icon.md
+  "ipa": { "baseName": "mygame" },// make ipa の出力名 <baseName>-<version>-<build>.ipa (任意)
   "infoPlist": { },               // Info.plist への追加キー
   "entitlements": { },            // entitlements (任意)
   "cmake": {

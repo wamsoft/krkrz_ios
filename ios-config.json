@@ -8,6 +8,8 @@
   "orientations": ["landscapeLeft", "landscapeRight"],
   "graphics": "gles",
   "repl": true,
+  "icon": "icon/AppIcon-1024.png",
+  "ipa": { "baseName": "krkrz-sample" },
   "cmake": {
     "pluginFolders": [
       "${BUILD_SYSTEM_DIR}/plugins",

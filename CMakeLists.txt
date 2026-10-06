@@ -117,6 +117,19 @@ else()
     set(KRKRZ_REPL_WEB OFF CACHE BOOL "" FORCE)
 endif()
 message(STATUS "[krkrz_ios] repl=${APP_REPL}")
+
+# 配布ビルド (make archive / ipa): エンジンの量産設定 MASTER を有効にする
+# (REPL / 統計 / メモリオーバーレイ等をすべて除外、ログ既定 WARNING)
+if(APP_DIST)
+    set(MASTER ON CACHE BOOL "" FORCE)
+else()
+    set(MASTER OFF CACHE BOOL "" FORCE)
+endif()
+message(STATUS "[krkrz_ios] dist=${APP_DIST} MASTER=${MASTER}")
+
+# Archive にアプリ以外 (静的ライブラリ) を含めない。アプリ本体は KrkrzIOS.cmake で NO に戻す。
+# (含まれると Xcode が «Generic Xcode Archive» 扱いにして ipa 書き出しに失敗する)
+set(CMAKE_XCODE_ATTRIBUTE_SKIP_INSTALL YES)
 option(KRKRZ_BUILD_TESTS "" OFF)
 option(KRKRZ_USE_ELEMENTS "" ON)
 option(KRKRZ_USE_A11Y "" OFF)

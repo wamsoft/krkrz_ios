@@ -113,6 +113,53 @@ else
 	xcrun devicectl device process launch --console --terminate-existing --device "$(DEVICE)" $(APP_ID) $(RUN_ARGS)
 endif
 
+# ----------------------------------------------------------------------
+# 配布ビルド (Archive / ipa)
+#
+#   make archive                         Release + MASTER (REPL なし) で xcarchive を作る
+#   make ipa                             archive → ipa 書き出し (既定 development 署名)
+#   make ipa EXPORT_METHOD=app-store-connect   App Store Connect / TestFlight 提出用
+#   make ipa EXPORT_METHOD=release-testing     Ad Hoc 配布 (登録済みデバイス)
+#
+# 開発用とはビルドディレクトリ・生成物を分ける (build/ios/dist, generated-dist)。
+# ios-config.json の "repl" に関係なく REPL は含まれない。
+# ----------------------------------------------------------------------
+EXPORT_METHOD ?= development
+DIST_GEN   := $(IOS_BUILD)/generated-dist
+DIST_DIR   := $(IOS_BUILD)/dist
+ARCHIVE    := $(IOS_BUILD)/archive/krkrz.xcarchive
+IPA_DIR    := $(IOS_BUILD)/ipa
+
+.PHONY: dist-gen dist-configure archive ipa
+
+dist-gen:
+	DIST=1 OUT_DIR="$(DIST_GEN)" python3 -I "$(BUILD_SYSTEM_DIR)/scripts/gen-config.py"
+
+dist-configure: dist-gen
+	cmake -S "$(BUILD_SYSTEM_DIR)" -B "$(DIST_DIR)" -G Xcode \
+		-DCMAKE_SYSTEM_NAME=iOS \
+		-DCMAKE_OSX_SYSROOT=iphoneos \
+		-DCMAKE_OSX_ARCHITECTURES=arm64 \
+		-DCMAKE_TOOLCHAIN_FILE="$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake" \
+		-DVCPKG_TARGET_TRIPLET=arm64-ios-krkrz \
+		-DMYAPP_DIR="$(DIST_GEN)" \
+		$(CMAKEOPT)
+
+archive: dist-configure
+	@test -n "$(DEVELOPMENT_TEAM)" || (echo "DEVELOPMENT_TEAM が未設定です (local.mk に書いてください)"; exit 1)
+	rm -rf "$(ARCHIVE)"
+	xcodebuild -project "$(DIST_DIR)/krkrz_ios.xcodeproj" -scheme krkrz -configuration Release \
+		-destination "generic/platform=iOS" -archivePath "$(ARCHIVE)" \
+		-allowProvisioningUpdates archive
+
+ipa: archive
+	python3 -I "$(BUILD_SYSTEM_DIR)/scripts/export-options.py" "$(EXPORT_METHOD)" "$(DEVELOPMENT_TEAM)" \
+		"$(IOS_BUILD)/ExportOptions.plist"
+	rm -rf "$(IPA_DIR)"
+	xcodebuild -exportArchive -archivePath "$(ARCHIVE)" -exportPath "$(IPA_DIR)" \
+		-exportOptionsPlist "$(IOS_BUILD)/ExportOptions.plist" -allowProvisioningUpdates
+	python3 -I "$(BUILD_SYSTEM_DIR)/scripts/rename-ipa.py" "$(IPA_DIR)" "$(DIST_GEN)/app.cmake" "$(EXPORT_METHOD)"
+
 xcode: $(XCODEPROJ)
 	open "$(XCODEPROJ)"
 

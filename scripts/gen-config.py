@@ -207,27 +207,66 @@ def write_if_changed(path, text):
     log(f"wrote {path}")
 
 
-def gen_icon(icon_path, out_dir):
+def png_has_alpha(path):
+    """sips で PNG のアルファ有無を調べる (App Store はアルファ付きアイコンを拒否する)"""
+    try:
+        import subprocess
+        out = subprocess.run(["sips", "-g", "hasAlpha", path], capture_output=True, text=True).stdout
+        return "hasAlpha: yes" in out
+    except Exception:
+        return False
+
+
+def png_size(path):
+    try:
+        import subprocess
+        out = subprocess.run(["sips", "-g", "pixelWidth", "-g", "pixelHeight", path],
+                             capture_output=True, text=True).stdout
+        w = int(re.search(r"pixelWidth: (\d+)", out).group(1))
+        h = int(re.search(r"pixelHeight: (\d+)", out).group(1))
+        return w, h
+    except Exception:
+        return None
+
+
+def gen_icon(icon_cfg, out_dir):
+    """icon: "path.png" または {"default": ..., "dark": ..., "tinted": ...}
+    いずれも 1024x1024 の PNG。dark / tinted は iOS 18 のダーク / ティント外観用 (任意)。"""
     xc = os.path.join(out_dir, "Assets.xcassets")
-    if not icon_path:
+    if not icon_cfg:
         if os.path.isdir(xc):
             shutil.rmtree(xc)
         return
-    if not os.path.isfile(icon_path):
-        raise SystemExit(f"icon not found: {icon_path}")
+    variants = {"default": icon_cfg} if isinstance(icon_cfg, str) else dict(icon_cfg)
+    if "default" not in variants:
+        raise SystemExit("icon: 'default' is required")
     iconset = os.path.join(xc, "AppIcon.appiconset")
+    if os.path.isdir(iconset):
+        shutil.rmtree(iconset)
     os.makedirs(iconset, exist_ok=True)
     write_if_changed(os.path.join(xc, "Contents.json"),
                      json.dumps({"info": {"author": "xcode", "version": 1}}, indent=2) + "\n")
-    dst = os.path.join(iconset, "AppIcon-1024.png")
-    if not os.path.exists(dst) or os.path.getmtime(dst) != os.path.getmtime(icon_path):
-        shutil.copy2(icon_path, dst)
-    # Xcode 14+ の単一サイズ (1024px) アイコン
-    contents = {
-        "images": [{"filename": "AppIcon-1024.png", "idiom": "universal", "platform": "ios", "size": "1024x1024"}],
-        "info": {"author": "xcode", "version": 1},
-    }
+    images = []
+    for kind in ("default", "dark", "tinted"):
+        if not variants.get(kind):
+            continue
+        src = resolve_path(variants[kind])
+        if not src or not os.path.isfile(src):
+            raise SystemExit(f"icon ({kind}) not found: {variants[kind]}")
+        size = png_size(src)
+        if size and size != (1024, 1024):
+            raise SystemExit(f"icon ({kind}) must be 1024x1024 PNG: {src} is {size[0]}x{size[1]}")
+        if kind == "default" and png_has_alpha(src):
+            warn(f"icon has an alpha channel (App Store rejects it): {src}")
+        name = f"AppIcon-1024-{kind}.png"
+        shutil.copy2(src, os.path.join(iconset, name))
+        img = {"filename": name, "idiom": "universal", "platform": "ios", "size": "1024x1024"}
+        if kind != "default":
+            img["appearances"] = [{"appearance": "luminosity", "value": kind}]
+        images.append(img)
+    contents = {"images": images, "info": {"author": "xcode", "version": 1}}
     write_if_changed(os.path.join(iconset, "Contents.json"), json.dumps(contents, indent=2) + "\n")
+    log(f"icon: {', '.join(k for k in ('default', 'dark', 'tinted') if variants.get(k))}")
 
 
 def main():
@@ -260,8 +299,14 @@ def main():
 
     team = os.environ.get("DEVELOPMENT_TEAM") or cfg.get("developmentTeam", "")
 
+    # 配布ビルド (make archive / ipa): REPL は ios-config.json の設定に関係なく含めない
+    dist = os.environ.get("DIST", "") not in ("", "0")
+    repl = cfg.get("repl", True) and not dist
+    if dist:
+        log("distribution build: REPL disabled")
+
     info_plist = dict(cfg.get("infoPlist") or {})
-    if cfg.get("repl", True):
+    if repl:
         # REPL (-replweb) の待受は iOS のローカルネットワーク権限の対象
         info_plist.setdefault("NSLocalNetworkUsageDescription",
                               "開発用 REPL (デバッグ接続) に使用します。")
@@ -274,7 +319,9 @@ def main():
         "APP_DEPLOYMENT_TARGET": cfg.get("deploymentTarget", "16.0"),
         "APP_DEVICE_FAMILY": ",".join(DEVICES[d] for d in devices),
         "APP_GRAPHICS": graphics,
-        "APP_REPL": "ON" if cfg.get("repl", True) else "OFF",
+        "APP_REPL": "ON" if repl else "OFF",
+        "APP_DIST": "ON" if dist else "OFF",
+        "APP_IPA_BASENAME": (cfg.get("ipa") or {}).get("baseName", ""),
         "APP_DEVELOPMENT_TEAM": team,
         "APP_ENTITLEMENTS": entitlements,
         "APP_ORIENTATIONS_PLIST": orient_plist,
@@ -299,7 +346,7 @@ def main():
     write_if_changed(os.path.join(out_dir, "myapp.cmake"), text)
 
     # --- icon
-    gen_icon(resolve_path(cfg["icon"]) if cfg.get("icon") else None, out_dir)
+    gen_icon(cfg.get("icon"), out_dir)
 
     # --- assets
     ap = cfg.get("assetPack") or {}
