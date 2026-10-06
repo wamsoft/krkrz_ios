@@ -92,6 +92,12 @@ configure: gen
 build: gen $(XCODEPROJ)
 	$(XCODEBUILD) build
 
+# 起動引数。 REPL=<port> で -replweb=<port> を付ける (repl 有効ビルドのみ)
+RUN_ARGS ?=
+ifneq ($(REPL),)
+RUN_ARGS += -replweb=$(REPL) -replwebidle=no
+endif
+
 APP_ID = $(shell python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["bundleId"])' "$(or $(APP_CONFIG_FILE),$(PROJECT_DIR)/ios-config.json)")
 
 run: build
@@ -101,10 +107,10 @@ ifneq ($(SIM_DEVICE),booted)
 endif
 	open -a Simulator
 	xcrun simctl install "$(SIM_DEVICE)" "$(APP)"
-	xcrun simctl launch --console-pty --terminate-running-process "$(SIM_DEVICE)" $(APP_ID)
+	xcrun simctl launch --console-pty --terminate-running-process "$(SIM_DEVICE)" $(APP_ID) $(RUN_ARGS)
 else
 	xcrun devicectl device install app --device "$(DEVICE)" "$(APP)"
-	xcrun devicectl device process launch --console --terminate-existing --device "$(DEVICE)" $(APP_ID)
+	xcrun devicectl device process launch --console --terminate-existing --device "$(DEVICE)" $(APP_ID) $(RUN_ARGS)
 endif
 
 xcode: $(XCODEPROJ)

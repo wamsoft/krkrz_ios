@@ -101,6 +101,22 @@ set(KRKRZ_LIB_PLATFORM
 
 option(KRKRZ_ENABLE_DAP "" OFF)
 option(KRKRZ_USE_LOGCORE "" OFF)
+
+# REPL: ブラウザ REPL (-replweb, HTTP+SSE) だけを有効化する (console REPL は端末が無いので不要)。
+# 起動引数 -replweb=<port> を渡したときだけ待ち受ける。全 IF (IPv6+IPv4) で待ち受けるので
+# Simulator は http://127.0.0.1:<port>/、実機は USB 経由の http://<端末名>.coredevice.local:<port>/
+# から繋がる。ios-config.json の "repl": false (配布ビルド) では REPL を一切含めない。
+if(APP_REPL)
+    set(KRKRZ_REPL OFF CACHE BOOL "" FORCE)
+    set(KRKRZ_REPL_FILE OFF CACHE BOOL "" FORCE)
+    set(KRKRZ_REPL_WEB ON CACHE BOOL "" FORCE)
+    set(KRKRZ_REPL_WEB_BIND_ANY ON CACHE BOOL "" FORCE)
+else()
+    set(KRKRZ_REPL OFF CACHE BOOL "" FORCE)
+    set(KRKRZ_REPL_FILE OFF CACHE BOOL "" FORCE)
+    set(KRKRZ_REPL_WEB OFF CACHE BOOL "" FORCE)
+endif()
+message(STATUS "[krkrz_ios] repl=${APP_REPL}")
 option(KRKRZ_BUILD_TESTS "" OFF)
 option(KRKRZ_USE_ELEMENTS "" ON)
 option(KRKRZ_USE_A11Y "" OFF)

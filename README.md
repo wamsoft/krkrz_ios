@@ -81,6 +81,7 @@ ${PROJECT_DIR}/build/ios/
   "devices": ["iphone", "ipad"],
   "orientations": ["landscapeLeft", "landscapeRight"],  // portrait / portraitUpsideDown も可
   "graphics": "metal",            // "metal" (SDL_Renderer) | "gles" (OpenGL ES, ogl/sdlogl DrawDevice)
+  "repl": true,                   // ブラウザ REPL (-replweb) を組み込むか。配布ビルドは false
   "icon": "icon/AppIcon-1024.png",// 1024x1024 PNG 1 枚 (任意)
   "infoPlist": { },               // Info.plist への追加キー
   "entitlements": { },            // entitlements (任意)
@@ -115,3 +116,22 @@ assetPack の結果はアプリバンドル直下にコピーされる。エン�
 
 `DEVICE` 未指定の `make build SDK=device` は `-target` ビルドになり、デバイス登録が行われない
 (登録済み Team / プロファイルがあればそれで署名される)。
+
+## REPL (開発用)
+
+`"repl": true` のビルドには、エンジンのブラウザ REPL (`-replweb`, HTTP+SSE) が入る。
+起動引数で `-replweb=<port>` を渡したときだけ待ち受ける (全インタフェース・IPv6+IPv4)。
+
+```bash
+make run REPL=8899                                   # Simulator → http://127.0.0.1:8899/
+make run SDK=device DEVICE=<UDID> REPL=8899          # 実機 → USB 経由で http://[<IPv6>]:8899/
+```
+
+実機は USB 接続時に CoreDevice が張る IPv6 トンネル経由で届く。アドレスは
+`dscacheutil -q host -a name <端末名>.coredevice.local` で引ける (端末名は
+`xcrun devicectl list devices` の Hostname)。ブラウザで開くと Console / Watch / Pad の
+UI、`curl -X POST --data '<TJS>' http://[...]:8899/cmd` でも評価できる (結果は `/events` の SSE)。
+REPL の使い方はエンジン側 `doc/REPL.md` と skill `krkrz-repl` を参照。
+
+初回はローカルネットワーク利用の許可ダイアログが出ることがある (`NSLocalNetworkUsageDescription`
+は repl 有効時に自動で Info.plist に入る)。配布ビルドでは `"repl": false` にすること。
