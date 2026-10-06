@@ -11,15 +11,36 @@
 
 - Xcode 15 以降 (Command Line Tools 含む), CMake 3.24 以降
 - vcpkg (`VCPKG_ROOT`)
-- `KRKRZ_BASE`: krkrz_dev の親フォルダ
 - 実機ビルド時: Apple Developer の Team ID (`local.mk` に `DEVELOPMENT_TEAM=XXXXXXXXXX`)
+
+## セットアップ
+
+[krkrz_dev](https://github.com/wamsoft/krkrz_dev) をこのリポジトリと**同じ階層**に clone する
+(krkrz_android / krkrz_web と同じ配置)。
+
+```bash
+mkdir kirikiri && cd kirikiri
+git clone --recursive https://github.com/wamsoft/krkrz_dev.git
+git clone https://github.com/wamsoft/krkrz_ios.git
+cd krkrz_ios
+make run
+```
+
+```
+kirikiri/            ← KRKRZ_BASE (既定 = このリポジトリの親フォルダ)
+├── krkrz_dev/       ← エンジン本体・プラグイン
+└── krkrz_ios/       ← このリポジトリ
+```
+
+別の場所の krkrz_dev を使う場合は環境変数 `KRKRZ_BASE` (krkrz_dev の**親**フォルダ) を指定する。
+iOS 対応のエンジン修正は krkrz_dev の develop ブランチ (2026-10 以降) に入っている。
 
 ## 使い方
 
 ```bash
 make build                 # Simulator 用 Debug ビルド (初回は vcpkg 依存のビルドで時間がかかる)
-make run                   # Simulator (既定 "iPad Pro 13-inch (M4)") で起動
-make run SIM_DEVICE="iPhone 16"
+make run                   # 起動中の Simulator にインストールして起動
+make run SIM_DEVICE=<UDID> # Simulator を指定 (未起動なら boot)。一覧: xcrun simctl list devices available
 make build SDK=device      # 実機用
 make xcode                 # 生成された Xcode プロジェクトを開く (デバッガ用)
 make distclean             # build/ios を削除

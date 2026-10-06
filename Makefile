@@ -13,13 +13,17 @@
 ifeq ($(VCPKG_ROOT),)
 $(error VCPKG_ROOT が未設定です)
 endif
-ifeq ($(KRKRZ_BASE),)
-$(error KRKRZ_BASE (krkrz_dev の親フォルダ) が未設定です)
-endif
-
 BUILD_SYSTEM_DIR := $(realpath $(CURDIR))
 PROJECT_DIR ?= $(BUILD_SYSTEM_DIR)
-export BUILD_SYSTEM_DIR PROJECT_DIR DEVELOPMENT_TEAM APP_CONFIG_FILE
+
+# krkrz_dev の参照先。 既定はこのリポジトリと同じ階層に clone した krkrz_dev
+# (KRKRZ_BASE/krkrz_dev と KRKRZ_BASE/krkrz_ios が並ぶ構成)。 環境変数で上書き可。
+KRKRZ_BASE ?= $(realpath $(BUILD_SYSTEM_DIR)/..)
+ifeq ($(wildcard $(KRKRZ_BASE)/krkrz_dev/src/core/CMakeLists.txt),)
+$(error $(KRKRZ_BASE)/krkrz_dev が見つかりません。krkrz_dev をこのリポジトリと同じ階層に clone するか KRKRZ_BASE を指定してください)
+endif
+
+export BUILD_SYSTEM_DIR PROJECT_DIR KRKRZ_BASE DEVELOPMENT_TEAM APP_CONFIG_FILE
 
 SDK    ?= simulator
 CONFIG ?= Debug

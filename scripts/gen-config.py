@@ -25,6 +25,9 @@ import sys
 
 BUILD_SYSTEM_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
 PROJECT_DIR = os.path.realpath(os.environ.get("PROJECT_DIR") or BUILD_SYSTEM_DIR)
+# ${KRKRZ_BASE} の既定 = このリポジトリと同じ階層 (Makefile / CMakeLists.txt と同じ規則)
+if not os.environ.get("KRKRZ_BASE"):
+    os.environ["KRKRZ_BASE"] = os.path.dirname(BUILD_SYSTEM_DIR)
 
 
 def log(msg):
