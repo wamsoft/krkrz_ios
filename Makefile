@@ -57,8 +57,17 @@ APP       := $(BUILD_DIR)/krkrz/$(CONFIG)-$(SYSROOT)/krkrz.app
 # 一覧: xcrun simctl list devices available
 SIM_DEVICE ?= booted
 
+# 通常は -target + -sdk で叩く (Xcode 26 の scheme ビルドは destination 解決に
+# iOS プラットフォーム (Settings > Components) の導入を要求するため)。
+# 実機で DEVICE=<UDID> を指定したときだけ scheme + destination にする
+# (自動署名で接続中のデバイスを Team に登録しプロファイルを作らせるのに必要)。
+ifneq ($(and $(filter device,$(SDK)),$(DEVICE)),)
+XCODEBUILD := xcodebuild -project "$(XCODEPROJ)" -scheme krkrz -configuration $(CONFIG) \
+	-destination "id=$(DEVICE)" -allowProvisioningUpdates -allowProvisioningDeviceRegistration
+else
 XCODEBUILD := xcodebuild -project "$(XCODEPROJ)" -target krkrz -configuration $(CONFIG) \
 	-sdk $(SYSROOT) -arch $(ARCH) -allowProvisioningUpdates
+endif
 
 .PHONY: all gen configure build run log xcode clean distclean vars bundle-id
 

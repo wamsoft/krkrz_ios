@@ -232,9 +232,15 @@ Simulator (iPad Pro 13" / iOS 18.5) で Metal 版・GLES 版とも `data/startup
 - A11Y 無効時の Elements コンパイルエラー
 - 常時フルスクリーン環境の GL 経路が縦横別倍率で引き伸ばされていた → レターボックスに統一、GL 経路のマウス座標換算 (Android の GLES にも効く)
 
+実機 (iPhone 11 / iOS 26.5, Personal Team 署名) でも起動を確認。実機ビルドは `DEVICE=<UDID>` 指定時のみ
+scheme + destination でビルドし、自動署名にデバイス登録とプロファイル作成をさせる (要 iOS プラットフォーム導入)。
+初回準備の手順は README「実機ビルドの初回準備」。
+
+macOS 版も同時に OpenGL ES を有効化 (krkrz_dev 側: vcpkg の angle[metal] を dylib で
+Contents/Frameworks に同梱、ANGLE (Metal) は GLES 3.0)。
+
 残課題:
 
-- 実機ビルド・署名 (`SDK=device`, `DEVELOPMENT_TEAM`)
 - Simulator でハードウェアキーボード接続扱いのとき、テキスト入力ベースライン有効でキーボードバーが出る (実機でキーボード無しなら出ない想定。要実機確認)
 - タッチ (`mEnableTouch` 時の `tfinger` 換算) のレターボックス対応
 - iPad のマルチタスク / 回転、Safe Area

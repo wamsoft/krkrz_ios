@@ -41,7 +41,8 @@ iOS 対応のエンジン修正は krkrz_dev の develop ブランチ (2026-10 �
 make build                 # Simulator 用 Debug ビルド (初回は vcpkg 依存のビルドで時間がかかる)
 make run                   # 起動中の Simulator にインストールして起動
 make run SIM_DEVICE=<UDID> # Simulator を指定 (未起動なら boot)。一覧: xcrun simctl list devices available
-make build SDK=device      # 実機用
+make build SDK=device DEVICE=<UDID>   # 実機用 (UDID は xcrun xctrace list devices)
+make run SDK=device DEVICE=<UDID>     # 実機にインストールして起動
 make xcode                 # 生成された Xcode プロジェクトを開く (デバッガ用)
 make distclean             # build/ios を削除
 
@@ -99,3 +100,18 @@ ${PROJECT_DIR}/build/ios/
 
 assetPack の結果はアプリバンドル直下にコピーされる。エンジンはバンドル直下の
 `data.xp3` → `data/startup.tjs` の順に探して起動する。
+
+## 実機ビルドの初回準備
+
+1. Xcode > Settings > Accounts で Apple ID にサインインし、**Settings > Components で iOS プラットフォームを導入**
+   (`xcodebuild -downloadPlatform iOS` でも可)。デバイス指定ビルドに必要。
+2. `local.mk` に Team ID を書く: `DEVELOPMENT_TEAM=XXXXXXXXXX`
+3. iPhone 側でデベロッパモードを有効化 (設定 > プライバシーとセキュリティ > デベロッパモード)
+4. `make build SDK=device DEVICE=<UDID>` — 自動署名で接続中のデバイスが Team に登録され、プロファイルが作られる
+5. 署名で `errSecInternalComponent` が出る場合 (ターミナル / エージェントからのビルドでキーチェーンの
+   許可ダイアログが出せない)、Terminal.app で一度だけ次を実行:
+   `security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '<ログインパスワード>' ~/Library/Keychains/login.keychain-db`
+6. 初回起動時は iPhone で 設定 > 一般 > VPN とデバイス管理 > 開発元を「信頼」
+
+`DEVICE` 未指定の `make build SDK=device` は `-target` ビルドになり、デバイス登録が行われない
+(登録済み Team / プロファイルがあればそれで署名される)。
