@@ -58,6 +58,11 @@ make distclean             # build/ios を削除
 PROJECT_DIR=/path/to/案件 make build
 ```
 
+krkrz_dev (src/core) を更新したら、ビルドの前に `make configure` (実機なら
+`make configure SDK=device`) を実行すること。`make build` は Xcode プロジェクトが
+既にあると作り直さないため、エンジン側でソースファイルが追加・削除されても拾わず、
+追加されたファイルがリンクされない (未定義シンボルのリンクエラーになる)。
+
 | 変数 | 意味 |
 |---|---|
 | `BUILD_SYSTEM_DIR` | このリポジトリ (自動) |
