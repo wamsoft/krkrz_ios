@@ -292,10 +292,18 @@ def main():
     if graphics not in ("metal", "gles"):
         raise SystemExit(f"unknown graphics '{graphics}' (must be 'metal' or 'gles')")
 
+    ent = dict(cfg.get("entitlements") or {})
+    # gamecenter プラグインを入れたら Game Center の entitlement を付ける
+    # (Android の playgames と同じく plugins に書くかどうかが唯一のスイッチ)
+    if "gamecenter" in (cfg.get("cmake", {}).get("plugins") or []):
+        ent.setdefault("com.apple.developer.game-center", True)
     entitlements = ""
-    if cfg.get("entitlements"):
-        entitlements = os.path.join(out_dir, "app.entitlements")
-        write_if_changed(entitlements, plistlib.dumps(cfg["entitlements"]).decode())
+    ent_path = os.path.join(out_dir, "app.entitlements")
+    if ent:
+        entitlements = ent_path
+        write_if_changed(entitlements, plistlib.dumps(ent).decode())
+    elif os.path.exists(ent_path):
+        os.remove(ent_path)   # 前回の設定の残り
 
     team = os.environ.get("DEVELOPMENT_TEAM") or cfg.get("developmentTeam", "")
 

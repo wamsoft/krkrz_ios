@@ -267,3 +267,9 @@ krkrz_android と機能を揃える。方針として決めたこと:
 - **Game Center (`plugins/gamecenter`)**: TJS API は `PlayGames` と同じ形 (コールバック形式)。
   実績はゲーム側の論理名 → ストア ID の対応表を持つ。クラウドセーブ (`GKSavedGame`, iCloud 必須) は後回し。
   確認は wamsoft の Team に吉里吉里の開発用アプリを用意して行う (Personal Team では Game Center 不可)。
+
+実装状況 (2026-10-14): `plugins/virtualpad` / `plugins/iosconfig` / `plugins/gamecenter` を追加。
+Simulator で描画・メニュー・設定画面・権利情報・Game Center API の呼び出し (未サインイン時のエラー経路) を確認。
+タップ操作・実機・Game Center のサインインと実績は未確認。
+Game Center の Simulator はサインインしていないと認証 handler が呼ばれないことがある
+(GameOverlayUI に接続できない)。`isAuthenticated` は 10 秒で打ち切って現在の状態を返す。

@@ -60,3 +60,28 @@ IosSystemMenu.edgeSwipeEnabled = false;   // 左端スワイプで開かない�
 
 表示する文字列は krkrz_android の `strings.xml` から `plugins/iosconfig/gen-strings.py` で
 `Strings.inc` を生成しています (en / ja / zh-Hans / zh-Hant)。
+
+## gamecenter — Game Center (実績)
+
+TJS の `GameCenter` クラス (static) で Game Center の実績を扱います。メソッド名と callback の形
+(`function(result, error)`) は krkrz_android の `PlayGames` と同じなので、実績 ID の対応表だけ OS ごとに持てば
+同じコードで動きます。API の一覧は `plugins/gamecenter/manual.tjs` にあります。
+
+- 認証: `isAuthenticated` / `signIn` / `getCurrentPlayer`。起動直後に自動でサインインを試みます
+- 実績: `loadAchievements` / `unlockAchievement` / `incrementAchievement` / `setStepsAchievement` /
+  `showAchievementsUI` / `showDashboard` / `resetAchievements` (開発用)
+- 段階型の実績は無いので、`incrementAchievement` / `setStepsAchievement` は `numSteps / totalSteps`
+  (省略時 100) を達成率に換算します
+- セーブゲーム (Snapshots) は未対応です。同名のメソッドは callback にエラーを返します
+- `iosconfig` があれば、システムメニューに「Game Center」の項目が増えます
+
+準備:
+
+- `cmake.plugins` に `gamecenter` を入れると、`gen-config.py` が Game Center の entitlement
+  (`com.apple.developer.game-center`) を自動で付けます
+- 有料の Apple Developer Team で署名します (Personal Team では Game Center を使えません)
+- App Store Connect にアプリを登録して Game Center を有効にし、実績を定義します
+- 端末は 設定 > Game Center でサインインしておきます
+
+Simulator ではサインインしていないと認証の結果が返ってこないことがあるため、`isAuthenticated` は
+10 秒で打ち切って現在の状態を返します。

@@ -187,6 +187,7 @@ Setting `Window.enableTouch = true` also delivers `onTouch*` events.
 |---|---|
 | `virtualpad` | Shows a translucent on-screen gamepad and passes touches on as gamepad input (`VK_PAD*`). Same source as krkrz_android |
 | `iosconfig` | Adds a system menu (swipe in from the left edge), a settings screen and a license screen |
+| `gamecenter` | Game Center (achievements). The TJS `GameCenter` class has the same shape as `PlayGames` in krkrz_android. Needs signing with a paid Apple Developer Team |
 
 ## Documentation
 
@@ -195,7 +196,7 @@ The documents under `docs/` are in Japanese.
 | Document | Contents |
 |---|---|
 | [docs/ios-config.md](docs/ios-config.md) | Full example and each key of `ios-config.json`, generated files |
-| [docs/plugins.md](docs/plugins.md) | How to use the iOS-specific plugins (virtual pad, system menu) |
+| [docs/plugins.md](docs/plugins.md) | How to use the iOS-specific plugins (virtual pad, system menu, Game Center) |
 | [docs/release.md](docs/release.md) | Distribution builds (Archive / ipa), App Store Connect submission, pre-submission checklist |
 | [docs/icon.md](docs/icon.md) | Where to put the app icon, how to set it, image requirements |
 | [docs/ios-design.md](docs/ios-design.md) | Design study and implementation history |

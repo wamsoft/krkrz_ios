@@ -1,0 +1,117 @@
+// GameCenter クラス (static) - iOS 専用
+//
+// Game Center (GameKit) への TJS バインディング。krkrz_android の PlayGames と
+// 同じメソッド名・同じ callback 形式にしてある。
+// callback シグネチャ:  function callback(result, error)
+//   - 成功時: result=値, error=void
+//   - 失敗時: result=void, error=文字列 (エラーメッセージ)
+// callback を void で渡せば fire-and-forget。
+//
+// 準備:
+//   - ios-config.json の cmake.plugins に "gamecenter" を入れる
+//     (Game Center の entitlement は gen-config.py が自動で付ける)
+//   - App Store Connect でアプリを登録し、Game Center を有効にして実績を定義する
+//   - 有料の Apple Developer Team で署名する (Personal Team では Game Center は使えない)
+//   - 端末は 設定 > Game Center でサインインしておく
+//
+// サインインは起動直後に自動で試みる (Play Games v2 の自動サインインに相当)。
+// iosconfig プラグインがあれば、システムメニューに「Game Center」が追加される。
+//
+// PlayGames との違い:
+//   - 実績 ID は App Store Connect で付けたもの (Play Console の ID とは別)
+//   - 段階型の実績は無く、達成率 (0-100%) で表す。increment / setSteps は
+//     numSteps / totalSteps (省略時 100) を達成率に換算する
+//   - セーブゲーム (Snapshots) は未対応。同名のメソッドは callback にエラーを返す
+
+class GameCenter {
+
+    // ---------------------------------------------------------
+    // 認証
+    // ---------------------------------------------------------
+
+    /**
+     * サインイン済みか。起動直後の自動サインインが終わるまで待ってから返す
+     * (Game Center に繋がらない環境では 10 秒で打ち切って現在の状態を返す)。
+     * @param cb function(authenticated, error) authenticated: bool
+     */
+    function isAuthenticated(cb);
+
+    /**
+     * サインイン画面を出す。既にサインイン済みならすぐ true。
+     * 利用者がサインインを何度か取り消すと画面を出せなくなり、error が返る
+     * (設定アプリの Game Center からサインインしてもらう)。
+     * @param cb function(authenticated, error)
+     */
+    function signIn(cb);
+
+    /**
+     * プレイヤー情報。
+     * @param cb function(info, error) info: %[playerId, displayName, title]
+     *   playerId = gamePlayerID、title = alias
+     */
+    function getCurrentPlayer(cb);
+
+    // ---------------------------------------------------------
+    // 実績
+    // ---------------------------------------------------------
+
+    /**
+     * 実績一覧 (App Store Connect に定義したもの + 進捗)。
+     * @param cb function(list, error) list: 配列。各要素は %[
+     *     achievementId,         実績 ID
+     *     name,                  表示名
+     *     description,           説明 (達成済みなら達成後の説明)
+     *     state,                 0=unlocked, 1=revealed, 2=hidden
+     *     type,                  常に 0 (段階型は無い)
+     *     xp,                    ポイント
+     *     percentComplete,       達成率 0-100 (Game Center のみ)
+     *     unlockedTimestamp,     (unlocked 時) 最終報告時刻 msec
+     *   ]
+     * @param forceReload 無視される (常にサーバーから取得)
+     */
+    function loadAchievements(cb, forceReload=false);
+
+    /**
+     * 実績を解除する (達成率 100%)。達成時は Game Center のバナーが出る。
+     * @param cb function(ok, error)
+     */
+    function unlockAchievement(cb, achievementId);
+
+    /**
+     * 現在の達成率に numSteps / totalSteps を足す。
+     * @param cb function(unlocked, error) unlocked: これで 100% に達したか
+     */
+    function incrementAchievement(cb, achievementId, numSteps, totalSteps=100);
+
+    /**
+     * 達成率を numSteps / totalSteps にする (下げる方向は Game Center 側で無視される)。
+     * @param cb function(unlocked, error)
+     */
+    function setStepsAchievement(cb, achievementId, numSteps, totalSteps=100);
+
+    /** 実績一覧の画面を出す。 @param cb function(ok, error) */
+    function showAchievementsUI(cb);
+
+    /** Game Center のダッシュボードを出す (Game Center のみ)。 @param cb function(ok, error) */
+    function showDashboard(cb);
+
+    /** 実績の進捗をすべて消す (開発用、Game Center のみ)。 @param cb function(ok, error) */
+    function resetAchievements(cb);
+
+    // ---------------------------------------------------------
+    // セーブゲーム: 未対応 (callback に error を返すだけ)
+    // ---------------------------------------------------------
+
+    function listSnapshots(cb, forceReload=false);
+    function readSnapshot(cb, uniqueName);
+    function writeSnapshot(cb, uniqueName, data, description="", playedTimeMs=-1, progressValue=-1);
+    function deleteSnapshot(cb, uniqueName);
+    function showSnapshotsUI(cb, title, allowAddBtn=true, allowDeleteBtn=true, maxSnapshots=0);
+}
+
+// 利用例 (Android と同じコードで、実績 ID だけ OS ごとに切り替える):
+//
+//   var Achv = typeof global.GameCenter !== "undefined" ? GameCenter : PlayGames;
+//   var ids = typeof global.GameCenter !== "undefined"
+//       ? %["clear" => "jp.example.game.clear"] : %["clear" => "CgkI...AchievementID"];
+//   Achv.unlockAchievement(void, ids.clear);
