@@ -15,7 +15,7 @@
       "${BUILD_SYSTEM_DIR}/plugins",
       "${KRKRZ_BASE}/krkrz_dev/src/plugins"
     ],
-    "plugins": ["json"]
+    "plugins": ["json", "virtualpad"]
   },
   "assetPack": {
     "baseFolder": "${BUILD_SYSTEM_DIR}",

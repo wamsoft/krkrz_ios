@@ -244,3 +244,26 @@ Contents/Frameworks に同梱、ANGLE (Metal) は GLES 3.0)。
 - Simulator でハードウェアキーボード接続扱いのとき、テキスト入力ベースライン有効でキーボードバーが出る (実機でキーボード無しなら出ない想定。要実機確認)
 - タッチ (`mEnableTouch` 時の `tfinger` 換算) のレターボックス対応
 - iPad のマルチタスク / 回転、Safe Area
+
+---
+
+## 6. P3 iOS 固有機能の方針 (2026-10-14)
+
+krkrz_android と機能を揃える。方針として決めたこと:
+
+- **仮想パッド (`plugins/virtualpad`)**: iOS / Android だけの機能なので krkrz_dev には置かず、
+  `VirtualPad.cpp` / `VirtualPad.h` / `Main.cpp` を krkrz_android の `app/src/main/cpp/virtualpad/`
+  と同一内容で管理する (直したらもう一方へ写す)。描画はエンジンの post-render コールバック、入力は
+  `SDL_SetEventFilter` で掴んだ指を SDL 仮想ジョイスティックへ流す (エンジンには VK_PAD* として届く)。
+  パッドの上で触れた指はエンジンのタッチ→マウス変換に渡らない。配置は Safe Area を避ける
+  (ノッチ / Dynamic Island / ホームインジケータ。Android のカットアウトにも効く)。
+  有効化・不透明度の保存と設定 UI はシステムメニュー側で用意する (Android は SharedPreferences)。
+- **システムメニュー + 設定画面**: Android のドロワー (設定 / ライセンス / Play Games) 相当を UIKit で作る。
+  SDL の UIWindow (`SDL_PROP_WINDOW_UIKIT_WINDOW_POINTER`) の上に重ね、設定画面はモーダル表示。
+  ゲーム設定との受け渡しは **Android と同じ TJS 関数名をそのまま使う**
+  (`KrkrzAndroidGetConfig` / `KrkrzAndroidSetConfig` / `KrkrzAndroidGetVolume` / `KrkrzAndroidSetVolume`)。
+  ゲームスクリプトを両 OS で共通にするため。呼び出しは continuous event でキューを drain する。
+  メニューを開く操作はジェスチャー検討 (他環境含め別途) で決める。それまでは左端スワイプで仮置き。
+- **Game Center (`plugins/gamecenter`)**: TJS API は `PlayGames` と同じ形 (コールバック形式)。
+  実績はゲーム側の論理名 → ストア ID の対応表を持つ。クラウドセーブ (`GKSavedGame`, iCloud 必須) は後回し。
+  確認は wamsoft の Team に吉里吉里の開発用アプリを用意して行う (Personal Team では Game Center 不可)。
