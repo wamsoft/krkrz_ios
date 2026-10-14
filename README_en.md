@@ -178,6 +178,16 @@ On iOS the engine converts touch into mouse input (SDL's standard conversion is 
 Setting `Window.enableTouch = true` also delivers `onTouch*` events.
 `Window.enableTouchMouse = false` stops the conversion to mouse input.
 
+## iOS-specific plugins
+
+`plugins/` holds plugins for iOS only. List a name in `cmake.plugins` of `ios-config.json` to build it in
+(`cmake.pluginFolders` must include `${BUILD_SYSTEM_DIR}/plugins`). See [docs/plugins.md](docs/plugins.md) for details.
+
+| Plugin | Contents |
+|---|---|
+| `virtualpad` | Shows a translucent on-screen gamepad and passes touches on as gamepad input (`VK_PAD*`). Same source as krkrz_android |
+| `iosconfig` | Adds a system menu (swipe in from the left edge), a settings screen and a license screen |
+
 ## Documentation
 
 The documents under `docs/` are in Japanese.
@@ -185,6 +195,7 @@ The documents under `docs/` are in Japanese.
 | Document | Contents |
 |---|---|
 | [docs/ios-config.md](docs/ios-config.md) | Full example and each key of `ios-config.json`, generated files |
+| [docs/plugins.md](docs/plugins.md) | How to use the iOS-specific plugins (virtual pad, system menu) |
 | [docs/release.md](docs/release.md) | Distribution builds (Archive / ipa), App Store Connect submission, pre-submission checklist |
 | [docs/icon.md](docs/icon.md) | Where to put the app icon, how to set it, image requirements |
 | [docs/ios-design.md](docs/ios-design.md) | Design study and implementation history |

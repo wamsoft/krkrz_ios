@@ -173,11 +173,22 @@ iOS ではタッチからマウスへの変換をエンジン側で行います 
 `Window.enableTouch = true` にすると `onTouch*` イベントも届きます。
 `Window.enableTouchMouse = false` でマウスへの変換を止められます。
 
+## iOS 固有プラグイン
+
+`plugins/` に iOS 専用のプラグインがあります。`ios-config.json` の `cmake.plugins` に名前を書くと組み込まれます
+(`cmake.pluginFolders` に `${BUILD_SYSTEM_DIR}/plugins` が必要です)。使い方の詳細は [docs/plugins.md](docs/plugins.md) にあります。
+
+| プラグイン | 内容 |
+|---|---|
+| `virtualpad` | 画面に半透明の仮想パッドを出し、タッチをゲームパッド入力 (`VK_PAD*`) として渡します。krkrz_android と同じソースです |
+| `iosconfig` | システムメニュー (左端からスワイプ) と、機能設定画面・権利情報画面を追加します |
+
 ## ドキュメント
 
 | ドキュメント | 内容 |
 |---|---|
 | [docs/ios-config.md](docs/ios-config.md) | `ios-config.json` の全体の例と各項目、生成物 |
+| [docs/plugins.md](docs/plugins.md) | iOS 固有プラグイン (仮想パッド・システムメニュー) の使い方 |
 | [docs/release.md](docs/release.md) | 配布ビルド (Archive / ipa)、App Store Connect 提出、提出前チェックリスト |
 | [docs/icon.md](docs/icon.md) | アプリアイコンの置き場所・設定・画像要件 |
 | [docs/ios-design.md](docs/ios-design.md) | 設計検討と実装経緯 |
