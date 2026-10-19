@@ -21,7 +21,7 @@
     "baseFolder": "${BUILD_SYSTEM_DIR}",
     "sources": [
       {
-        "comment": "案件データ (data/startup.tjs から起動)。サンプルはエンジン同梱のデモ",
+        "comment": "ゲームのデータ (data/startup.tjs から起動)。サンプルはエンジン同梱のデモ",
         "type": "mirror",
         "from": "${KRKRZ_BASE}/krkrz_dev/src/core/data",
         "include": ["**/*"],
