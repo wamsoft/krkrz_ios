@@ -29,7 +29,7 @@
 make ipa                                     # development (開発用署名。登録済みデバイスに入る)
 make ipa EXPORT_METHOD=release-testing       # Ad Hoc (登録済みデバイスへの配布)
 make ipa EXPORT_METHOD=app-store-connect     # App Store Connect / TestFlight 提出用
-PROJECT_DIR=/path/to/案件 make ipa EXPORT_METHOD=app-store-connect
+PROJECT_DIR=/path/to/mygame make ipa EXPORT_METHOD=app-store-connect
 ```
 
 - `make archive` … `build/ios/archive/krkrz.xcarchive` を作る (Xcode の Organizer でも開ける)

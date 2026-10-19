@@ -1,6 +1,6 @@
 # 吉里吉里Z iOS 版 外枠リポジトリ 設計検討
 
-`krkrz_android` と同じ「外枠テンプレート」方式で、案件フォルダ (`PROJECT_DIR`) を指定すると
+`krkrz_android` と同じ「外枠テンプレート」方式で、プロジェクトフォルダ (`PROJECT_DIR`) を指定すると
 その資材を内包した iOS アプリ (.app / .ipa) を作れる構成を目指す。エンジン本体・プラグインは
 `${KRKRZ_BASE}/krkrz_dev` を参照し、このリポジトリはビルド定義・パッケージング・iOS 固有プラグインだけを持つ。
 
@@ -14,7 +14,7 @@
 
 | 要素 | Android での実装 | iOS での扱い |
 |---|---|---|
-| 案件設定 | `app-config.json` (単一ソース) | `ios-config.json` (同じ思想・`cmake` / `assetPack` は同スキーマ) |
+| タイトルの設定 | `app-config.json` (単一ソース) | `ios-config.json` (同じ思想・`cmake` / `assetPack` は同スキーマ) |
 | BUILD_SYSTEM_DIR / PROJECT_DIR 分離 | settings.gradle / Makefile | Makefile + CMake でそのまま踏襲。出力は `${PROJECT_DIR}/build/ios/` |
 | `${VAR}` 展開・相対パスは PROJECT_DIR 基準 | build.gradle `expandEnv` / `resolvePath` | 生成スクリプトで同仕様を実装 |
 | cmake セクション → `myapp.cmake` 生成 | `generateMyappCmake` (gradle) | 生成スクリプトで同一出力 (`TVP_PLUGIN_FOLDERS` / `TVP_PLUGINS` / `TVP_PLUGINS_STATIC`) |
@@ -67,14 +67,14 @@ xcodebuild -project ... -scheme krkrz -configuration Debug|Release [archive / -e
 - **Xcode ジェネレータを選ぶ理由**: コード署名・プロビジョニング・アセットカタログ (アイコン)・LaunchScreen storyboard のコンパイル・Archive/Export を Xcode 標準経路に任せられる。Ninja で .app を組むとこれらを全部自前で書くことになる。
 - 生成された .xcodeproj は「生成物」扱い (`${PROJECT_DIR}/build/ios/<sdk>/`)。手で編集しない。Xcode でのデバッグは生成物をそのまま開けばよい。
 - vcpkg triplet は SDK ごとに 1 つなので **実機と Simulator はビルドディレクトリを分ける** (`build/ios/device`, `build/ios/simulator`)。x86_64 Simulator は対象外 (Apple Silicon 前提)。
-- 却下案: 「エンジンを静的 xcframework 化して手書き Xcode プロジェクトから参照」→ 2 段ビルドになり、プラグイン構成が案件ごとに変わる本構成では利点が薄い。
+- 却下案: 「エンジンを静的 xcframework 化して手書き Xcode プロジェクトから参照」→ 2 段ビルドになり、プラグイン構成がタイトルごとに変わる本構成では利点が薄い。
 
 ### 2.2 SDL3 の扱い: 外枠で版固定・静的リンク
 
 - 外枠の CMakeLists で `add_subdirectory(core)` より前に SDL3 を FetchContent (**リリースタグ固定**、Android の AAR と同じ 3.4.x 系に揃える)、`SDL_STATIC=ON / SDL_SHARED=OFF` で `SDL3::SDL3` を作る → core 側の FetchContent はスキップされる。
 - 静的にする理由: iOS では動的 framework の埋め込み・署名の手間が増えるだけで利点がない。krkrz 本体も静的プラグインも 1 バイナリにまとめる。
 - SDL の iOS 固有設定: `UILaunchStoryboardName` 必須、`SDL_HINT_IOS_HIDE_HOME_INDICATOR`、向きは Info.plist `UISupportedInterfaceOrientations` + `SDL_HINT_ORIENTATIONS` (Android の `sdl_orientations` 相当を ios-config.json のキーにする)。
-- 将来 SDL を案件横断で使い回したくなったら、SDL だけ xcframework を事前ビルドして `find_package` させる方式 (Android の prefab と同じ発想) に切り替え可能。
+- 将来 SDL をタイトル横断で使い回したくなったら、SDL だけ xcframework を事前ビルドして `find_package` させる方式 (Android の prefab と同じ発想) に切り替え可能。
 
 ### 2.3 グラフィックス (GLES) の扱い
 
@@ -88,8 +88,8 @@ xcodebuild -project ... -scheme krkrz -configuration Debug|Release [archive / -e
 
 **方針**:
 
-1. **既定は A (Metal)**。macOS と同じ構成で最短で動かす。GL を使わない一般的なノベル系案件はこれで足りる。
-2. **B をビルドオプションとして用意** (`ios-config.json` の `graphics: "metal" | "gles"`)。GL 系機能が必要な案件だけ ON。Android とのコード共有度が最も高く、当面の現実解。
+1. **既定は A (Metal)**。macOS と同じ構成で最短で動かす。GL を使わない一般的なノベル系タイトルはこれで足りる。
+2. **B をビルドオプションとして用意** (`ios-config.json` の `graphics: "metal" | "gles"`)。GL 系機能が必要なタイトルだけ ON。Android とのコード共有度が最も高く、当面の現実解。
 3. C は「Apple が OpenGLES.framework を削除する兆候が出たら」の保険として調査メモに留める。
 
 要確認 (P0/P2 で検証):
@@ -102,7 +102,7 @@ xcodebuild -project ... -scheme krkrz -configuration Debug|Release [archive / -e
 - assetPack.sources の結果を `${PROJECT_DIR}/build/ios/assets/` にステージングし、**バンドル直下にフォルダ参照としてコピー** (`data/`、`*.xp3`、`resource` 系)。iOS のバンドルは直接ファイルアクセスできるので Android の AssetManager / Bootstrap コピーは不要。
 - `resource://` (core `resource/` やフォント) も同じくバンドル直下へ。
 - 日本語フォント: エンジンは OS フォントを列挙しない (CoreText 未対応) ので、`fonts.json` 同梱か `KRKRZ_EMBED_BUNDLED_FONTS=ON` 前提。
-- 容量: App Store のアプリサイズ上限内なら全同梱。超える案件は **Background Assets (Apple-hosted asset packs)** を PAD 相当として後フェーズで対応。設定キーは `assetPacks[]` として Android の `padPacks` と対になる形で予約しておく。
+- 容量: App Store のアプリサイズ上限内なら全同梱。超えるタイトルは **Background Assets (Apple-hosted asset packs)** を PAD 相当として後フェーズで対応。設定キーは `assetPacks[]` として Android の `padPacks` と対になる形で予約しておく。
 
 ### 2.5 プラグイン
 
@@ -120,7 +120,7 @@ xcodebuild -project ... -scheme krkrz -configuration Debug|Release [archive / -e
 krkrz_ios/
 ├── Makefile                 # gradlew ラッパーに相当: configure/build/run/archive/export/clean
 ├── CMakeLists.txt           # 外枠: myapp.cmake 読込, PLATFORM defines, SDL3 固定, core 取り込み, バンドル設定
-├── ios-config.json          # サンプル案件設定 (PROJECT_DIR 未指定時に使用)
+├── ios-config.json          # サンプルの設定 (PROJECT_DIR 未指定時に使用)
 ├── cmake/
 │   └── KrkrzIOS.cmake       # バンドル/署名/リソース配置のヘルパ
 ├── ios/                     # テンプレート
@@ -136,7 +136,7 @@ krkrz_ios/
 └── docs/
 ```
 
-`local.properties` 相当 (案件横断の環境設定: `DEVELOPMENT_TEAM`、署名 ID、App Store Connect API キー) は `BUILD_SYSTEM_DIR/local.mk` (gitignore) に置く。
+`local.properties` 相当 (タイトル横断の環境設定: `DEVELOPMENT_TEAM`、署名 ID、App Store Connect API キー) は `BUILD_SYSTEM_DIR/local.mk` (gitignore) に置く。
 
 ### 2.7 ios-config.json 案
 
@@ -171,7 +171,7 @@ krkrz_ios/
 }
 ```
 
-- `cmake` と `assetPack` を Android と完全に同じスキーマにしておけば、案件フォルダに `app-config.json` と `ios-config.json` を並べて同じ `data/` を共有できる。
+- `cmake` と `assetPack` を Android と完全に同じスキーマにしておけば、プロジェクトフォルダに `app-config.json` と `ios-config.json` を並べて同じ `data/` を共有できる。
 - assetPack のマージ処理は Android では Groovy 実装。iOS は Python (Xcode CLT に同梱の python3) で書き、将来的には両外枠で共有ツール化も検討。
 
 ### 2.8 開発サイクル (Makefile)
@@ -194,10 +194,10 @@ krkrz_ios/
 | フェーズ | ゴール | 主な作業 |
 |---|---|---|
 | **P0 スパイク** | Simulator で `data/startup.tjs` が起動し描画・入力・音が出る | 最小 CMakeLists (Xcode gen, arm64-ios-simulator, `KRKRZ_USE_OPENGL=OFF`, プラグイン json のみ static)。1.3 のエンジン修正を順次 krkrz_dev へ。vcpkg 依存 (libvpx 等) の iOS ビルド可否確認 |
-| **P1 テンプレート化** | 案件フォルダ指定で実機用 .ipa まで作れる | ios-config.json / gen-config.py / assetPack / Info.plist・アイコン・LaunchScreen / 署名 / Makefile 一式 / README |
+| **P1 テンプレート化** | プロジェクトフォルダ指定で実機用 .ipa まで作れる | ios-config.json / gen-config.py / assetPack / Info.plist・アイコン・LaunchScreen / 署名 / Makefile 一式 / README |
 | **P2 GLES** | `graphics: "gles"` で ogl / sdlogl / Canvas / Effekseer が動く | EAGL 検証、バックグラウンド時の GL 停止確認 |
 | **P3 iOS 固有機能** | Android 版と機能パリティ | virtualpad 移植、設定画面、Game Center、REPL (TCP)、Safe Area / ホームインジケータ、オーディオセッション方針 |
-| **P4 配信** | 大容量案件・ストア提出の自動化 | Background Assets、TestFlight アップロード自動化、VoiceOver (AccessKit iOS) 検討 |
+| **P4 配信** | 大容量タイトル・ストア提出の自動化 | Background Assets、TestFlight アップロード自動化、VoiceOver (AccessKit iOS) 検討 |
 
 ---
 
@@ -205,7 +205,7 @@ krkrz_ios/
 
 1. **最低対応 iOS バージョン** (案: 16.0。SDL3 自体は iOS 11+ だが、検証コストと Background Assets 等を考えると高めでよい)
 2. **iPad 対応** の要否 (ユニバーサルにするか iPhone 専用か)
-3. **GL 系機能 (Canvas / Shader / Effekseer) が必要な案件が近々あるか** → あれば P2 を前倒し
+3. **GL 系機能 (Canvas / Shader / Effekseer) が必要なタイトルが近々あるか** → あれば P2 を前倒し
 4. エンジン側修正 (1.3) を krkrz_dev に直接入れてよいか (Android 外枠と同様「外枠からは触らない」原則なので、修正は krkrz_dev 側でコミットする想定)
 
 ---

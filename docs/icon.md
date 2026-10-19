@@ -5,11 +5,11 @@ iOS のアプリアイコンは **1024x1024 の PNG 1 枚** から作る (Xcode 
 
 ## 置き場所と設定
 
-案件フォルダにアイコンを置き、`ios-config.json` の `icon` で指定する
+プロジェクトフォルダにアイコンを置き、`ios-config.json` の `icon` で指定する
 (パスは `PROJECT_DIR` 基準。`${BUILD_SYSTEM_DIR}` 等の変数も使える)。
 
 ```
-<案件>/
+<プロジェクトフォルダ>/
 ├── ios-config.json
 └── icon/
     ├── AppIcon-1024.png          … 通常 (必須)
