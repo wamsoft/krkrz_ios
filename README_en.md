@@ -1,4 +1,4 @@
-<!-- source_hash: 14e94eec212c -->
+<!-- source_hash: 83c0405962dd -->
 # krkrz_ios — Kirikiri Z for iOS
 
 [日本語](README.md) | English
@@ -193,6 +193,14 @@ The documentation for Kirikiri Z itself is on the [documentation site](https://w
 
 ## License
 
-What is referenced or fetched at build time (the Kirikiri Z engine and plugins, SDL3, and the
-dependency libraries fetched through vcpkg) follows its own license. Include the license notices
-required in your distribution on the title side, according to the engine, plugins and libraries you use.
+This repository (build scripts, tools and templates) is under the [MIT License](LICENSE).
+
+The following, referenced or fetched at build time, follow their own licenses; the license of this
+repository does not extend to them.
+
+- The Kirikiri Z engine and plugins (each submodule under krkrz_dev)
+- SDL3 (zlib License) and the dependency libraries fetched through vcpkg
+- Xcode / the iOS SDK (Apple's license terms)
+
+Include the license notices required in your distribution on the title side, according to the engine,
+plugins and libraries you use.
