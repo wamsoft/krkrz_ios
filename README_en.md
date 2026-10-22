@@ -179,6 +179,19 @@ On iOS the engine converts touch into mouse input (SDL's standard conversion is 
 Setting `Window.enableTouch = true` also delivers `onTouch*` events.
 `Window.enableTouchMouse = false` stops the conversion to mouse input.
 
+## Screen reader (VoiceOver)
+
+Enabled by default (`"a11y"` in `ios-config.json`). Elements dialogs are read and operable with VoiceOver
+without extra work. UI drawn on Layers can be exposed with `ElementsDialog.setGameA11y` / `a11yLayers`, and any
+text can be read with `ElementsDialog.announce`. See the engine documentation (the accessibility guide) and the
+core demo `data/a11y`. Setting `"a11y": false` stops exposing anything to the OS (the API still works).
+Building it in adds about 0.35 MB to the executable.
+
+- On a device: Settings > Accessibility > VoiceOver. Choosing VoiceOver in Settings > Accessibility >
+  Accessibility Shortcut lets you toggle it by triple-clicking the side button
+- On the Simulator: VoiceOver is not available; check elements, names, frames and actions with Xcode's Accessibility Inspector
+- In the REPL: `.a11y` shows the accessibility tree, `.a11ylog` the speech log, and `ElementsDialog.a11yActive` whether an assistive technology is connected
+
 ## iOS-specific plugins
 
 `plugins/` holds plugins for iOS only. List a name in `cmake.plugins` of `ios-config.json` to build it in

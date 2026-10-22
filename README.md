@@ -174,6 +174,19 @@ iOS ではタッチからマウスへの変換をエンジン側で行います 
 `Window.enableTouch = true` にすると `onTouch*` イベントも届きます。
 `Window.enableTouchMouse = false` でマウスへの変換を止められます。
 
+## 読み上げ (VoiceOver)
+
+既定で有効です (`ios-config.json` の `"a11y"`)。Elements のダイアログは何もしなくても VoiceOver で読まれ、
+操作できます。Layer に描いた UI は `ElementsDialog.setGameA11y` / `a11yLayers` で、任意の文は
+`ElementsDialog.announce` で読ませられます。使い方はエンジンのドキュメント (読み上げのガイド) とコアデモ
+`data/a11y` を見てください。`"a11y": false` にすると OS へは出しません (API はそのまま使えます)。
+組み込むと実行ファイルが約 0.35 MB 増えます。
+
+- 実機: 設定 > アクセシビリティ > VoiceOver。設定 > アクセシビリティ > ショートカット で VoiceOver を選ぶと、
+  サイドボタンのトリプルクリックで切り替えられます
+- Simulator: VoiceOver は使えないので、Xcode の Accessibility Inspector で要素・名前・枠・操作を確かめます
+- REPL: `.a11y` で読み上げツリー、`.a11ylog` で読み上げログ、`ElementsDialog.a11yActive` で接続の有無を見られます
+
 ## iOS 固有プラグイン
 
 `plugins/` に iOS 専用のプラグインがあります。`ios-config.json` の `cmake.plugins` に名前を書くと組み込まれます
