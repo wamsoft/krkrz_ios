@@ -100,7 +100,7 @@ static KrkrzEdgePanTarget *gEdgePanTarget;
         [self addSubview:_dimmer];
 
         _panel = [[UIView alloc] init];
-        _panel.backgroundColor = UIColor.systemBackgroundColor;
+        _panel.backgroundColor = iosconfig::OpaqueBackground(UIColor.systemBackgroundColor);
         [self addSubview:_panel];
 
         UISwipeGestureRecognizer *swipe =
@@ -266,6 +266,16 @@ static KrkrzEdgePanTarget *gEdgePanTarget;
 @end
 
 namespace iosconfig {
+
+UIColor *OpaqueBackground(UIColor *base) {
+    return [UIColor colorWithDynamicProvider:^UIColor *(UITraitCollection *tc) {
+        UIColor *c = [base resolvedColorWithTraitCollection:tc];
+        CGFloat r = 0, g = 0, b = 0, a = 0;
+        if ([c getRed:&r green:&g blue:&b alpha:&a] && r < 0.02 && g < 0.02 && b < 0.02)
+            return [UIColor colorWithWhite:0.07 alpha:1.0];
+        return [c colorWithAlphaComponent:1.0];
+    }];
+}
 
 void InstallMenuIfReady() {
     if (gOverlay) return;

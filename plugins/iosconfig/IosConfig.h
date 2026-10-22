@@ -9,6 +9,7 @@
 #pragma once
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 #include "tp_stub.h"
 
@@ -60,6 +61,11 @@ void ApplyPadPrefs();                // 起動時に保存値を反映
 NSString *L(NSString *key);
 
 // ---- システムメニュー (SystemMenu.mm) ----
+
+// メニューパネルの背景色。ダークモードの背景色は純黒 (0,0,0) になるが、実機ではゲームの GL 画面に
+// 重ねた純黒の部分だけゲームが透けて見える (Simulator とスクリーンショットでは不透明。全画面表示の
+// 設定画面などでは起きない)。純黒をわずかに明るい黒に置き換える
+UIColor *OpaqueBackground(UIColor *base);
 
 void InstallMenuIfReady();   // SDL のウィンドウができていればジェスチャ等を取り付ける
 void OpenMenu();
