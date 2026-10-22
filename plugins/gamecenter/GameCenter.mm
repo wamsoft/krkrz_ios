@@ -188,9 +188,18 @@ void PresentAuthVC() {
     [presenter presentViewController:vc animated:YES completion:nil];
 }
 
+// 認証の結果を callback へ返す。端末で Game Center にサインインしていても、アプリが
+// Game Center に登録されていない (App Store Connect で未設定など) と handler にエラーが来て
+// 実績などは使えない。そのときは false ではなくエラーとして返し、原因が分かるようにする
+void ResolveAuthState(const Callback &cb) {
+    if (gAuthError && gAuthError.code == GKErrorGameUnrecognized)
+        Reject(cb, gAuthError, @"This app is not recognized by Game Center");
+    else
+        Resolve(cb, tTJSVariant((tjs_int)(IsAuthenticated() ? 1 : 0)));
+}
+
 void FlushAuthWaiters() {
-    tTJSVariant ok((tjs_int)(IsAuthenticated() ? 1 : 0));
-    for (auto &cb : gWaitAuthenticated) Resolve(cb, ok);
+    for (auto &cb : gWaitAuthenticated) ResolveAuthState(cb);
     gWaitAuthenticated.clear();
 }
 
@@ -329,7 +338,7 @@ public:
         StartAuthentication();
         Callback c(cb);
         if (gAuthDone) {
-            Resolve(c, tTJSVariant((tjs_int)(IsAuthenticated() ? 1 : 0)));
+            ResolveAuthState(c);
             return;
         }
         gWaitAuthenticated.push_back(c);
@@ -342,6 +351,10 @@ public:
     static void signIn(tTJSVariant cb) {
         StartAuthentication();
         Callback c(cb);
+        if (gAuthDone && gAuthError && gAuthError.code == GKErrorGameUnrecognized) {
+            ResolveAuthState(c);
+            return;
+        }
         if (IsAuthenticated()) {
             Resolve(c, tTJSVariant((tjs_int)1));
             return;

@@ -32,6 +32,8 @@ class GameCenter {
     /**
      * サインイン済みか。起動直後の自動サインインが終わるまで待ってから返す
      * (Game Center に繋がらない環境では 10 秒で打ち切って現在の状態を返す)。
+     * 端末はサインイン済みでも、アプリが Game Center に登録されていない
+     * (App Store Connect で未設定、バンドル ID 違いなど) ときは error が返る。
      * @param cb function(authenticated, error) authenticated: bool
      */
     function isAuthenticated(cb);
