@@ -25,7 +25,7 @@
   "graphics": "gles",             // "gles" (既定。OpenGL ES, ogl/sdlogl DrawDevice、Canvas / Shader 等の GL 機能が使える)
                                   // | "metal" (SDL_Renderer のみ。GL 機能は使えない)
   "repl": true,                   // ブラウザ REPL (-replweb) を組み込むか。配布ビルドは false
-  "a11y": false,                  // 読み上げ (VoiceOver) にダイアログ等を出すか
+  "a11y": true,                   // 読み上げ (VoiceOver) にダイアログ等を出すか (既定 true)
   "icon": "icon/AppIcon-1024.png",// 1024x1024 PNG (アルファ無し)。ダーク / ティントも可 → icon.md
   "ipa": { "baseName": "mygame" },// make ipa の出力名 <baseName>-<version>-<build>.ipa (任意)
   "infoPlist": { },               // Info.plist への追加キー
@@ -57,7 +57,7 @@
 | `orientations` | `["landscapeLeft", "landscapeRight"]` | 画面の向き。`portrait` / `portraitUpsideDown` も指定できます |
 | `graphics` | `gles` | `gles` (OpenGL ES。ogl / sdlogl DrawDevice、Canvas / Shader 等の GL 機能が使えます) か `metal` (SDL_Renderer のみ。GL 機能は使えません) |
 | `repl` | `true` | ブラウザ REPL (`-replweb`) を組み込むか。配布ビルド (`make archive` / `make ipa`) はこの値に関係なく REPL を含めません |
-| `a11y` | `false` | 読み上げ (VoiceOver) 対応を組み込むか。Elements のダイアログ・`ElementsDialog.setGameA11y` / `a11yLayers` のノード・`announce` を VoiceOver へ出します。`false` でも API は使えます (OS へ出ないだけ) |
+| `a11y` | `true` | 読み上げ (VoiceOver) 対応を組み込むか。Elements のダイアログ・`ElementsDialog.setGameA11y` / `a11yLayers` のノード・`announce` を VoiceOver へ出します。`false` にすると OS へは出しません (API は使えます) |
 | `icon` | なし | アプリアイコン。文字列 1 つか、`default` / `dark` / `tinted` の辞書 ([icon.md](icon.md)) |
 | `ipa.baseName` | なし | `make ipa` の出力名を `<baseName>-<version>-<build>[-<method>].ipa` にします ([release.md](release.md)) |
 | `infoPlist` | なし | Info.plist への追加キー |

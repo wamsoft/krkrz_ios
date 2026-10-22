@@ -111,7 +111,7 @@ ${PROJECT_DIR}/build/ios/
 | `deploymentTarget` / `devices` / `orientations` | 最低 iOS バージョン、対応機種 (iPhone / iPad)、画面の向き |
 | `graphics` | `gles` (既定。OpenGL ES。Canvas / Shader 等の GL 機能が使えます) / `metal` (SDL_Renderer のみ) |
 | `repl` | ブラウザ REPL (`-replweb`) を組み込むか。配布ビルドは設定に関係なく含めません |
-| `a11y` | 読み上げ (VoiceOver) 対応を組み込むか。Elements のダイアログ・`setGameA11y` / `a11yLayers` のノード・`announce` を VoiceOver へ出します |
+| `a11y` | 読み上げ (VoiceOver) 対応を組み込むか。Elements のダイアログ・`setGameA11y` / `a11yLayers` のノード・`announce` を VoiceOver へ出します。既定で有効です |
 | `icon` | アプリアイコン (1024x1024 PNG)。[docs/icon.md](docs/icon.md) |
 | `ipa.baseName` | `make ipa` の出力ファイル名 |
 | `infoPlist` / `entitlements` | Info.plist への追加キー、entitlements |

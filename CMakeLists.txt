@@ -135,7 +135,7 @@ option(KRKRZ_USE_ELEMENTS "" ON)
 # 読み上げ (VoiceOver): ios-config.json の "a11y"。 Elements のダイアログ等を AccessKit 経由で
 # UIAccessibility へ出す (krkrz_dev doc/specification/accessibility.md)
 if(NOT DEFINED APP_A11Y)
-    set(APP_A11Y OFF)
+    set(APP_A11Y ON)
 endif()
 set(KRKRZ_USE_A11Y ${APP_A11Y} CACHE BOOL "" FORCE)
 message(STATUS "[krkrz_ios] a11y=${APP_A11Y}")

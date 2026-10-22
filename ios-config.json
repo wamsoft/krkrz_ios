@@ -8,6 +8,7 @@
   "orientations": ["landscapeLeft", "landscapeRight"],
   "graphics": "gles",
   "repl": true,
+  "a11y": true,
   "icon": "icon/AppIcon-1024.png",
   "ipa": { "baseName": "krkrz-sample" },
   "cmake": {

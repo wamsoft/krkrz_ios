@@ -114,7 +114,7 @@ described in [docs/ios-config.md](docs/ios-config.md) (in Japanese).
 | `deploymentTarget` / `devices` / `orientations` | Minimum iOS version, supported devices (iPhone / iPad), screen orientations |
 | `graphics` | `gles` (default; OpenGL ES, GL features such as Canvas / Shader are available) / `metal` (SDL_Renderer only) |
 | `repl` | Whether to build in the browser REPL (`-replweb`). Distribution builds never include it, regardless of this setting |
-| `a11y` | Whether to build in screen reader (VoiceOver) support. Elements dialogs, `setGameA11y` / `a11yLayers` nodes and `announce` are exposed to VoiceOver |
+| `a11y` | Whether to build in screen reader (VoiceOver) support. Elements dialogs, `setGameA11y` / `a11yLayers` nodes and `announce` are exposed to VoiceOver. Enabled by default |
 | `icon` | App icon (1024x1024 PNG). [docs/icon.md](docs/icon.md) |
 | `ipa.baseName` | Output file name of `make ipa` |
 | `infoPlist` / `entitlements` | Extra Info.plist keys, entitlements |

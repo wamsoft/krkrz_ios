@@ -328,7 +328,7 @@ def main():
         "APP_DEVICE_FAMILY": ",".join(DEVICES[d] for d in devices),
         "APP_GRAPHICS": graphics,
         "APP_REPL": "ON" if repl else "OFF",
-        "APP_A11Y": "ON" if cfg.get("a11y", False) else "OFF",
+        "APP_A11Y": "ON" if cfg.get("a11y", True) else "OFF",
         "APP_DIST": "ON" if dist else "OFF",
         "APP_IPA_BASENAME": (cfg.get("ipa") or {}).get("baseName", ""),
         "APP_DEVELOPMENT_TEAM": team,
